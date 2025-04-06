@@ -1,6 +1,5 @@
-import csv
-
 import numpy as np
+import pandas as pd
 import torch
 
 
@@ -13,7 +12,7 @@ def intify_atlante(data):
 
 def intify_pacifique(data):
     if 'W' in data or 'S' in data:
-        return 360-float(data[:-1])
+        return 360 - float(data[:-1])
     elif 'E' in data or 'N' in data:
         return float(data[:-1])
 
@@ -34,22 +33,24 @@ def coords_parser(filename):
     Each coordinate is a list of two float values
     """
     coords_dict = {}
-    with open(filename) as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            _key = row['ID']
-            value_lon = (intify(row['Longitude'], filename)+65)/20
-            value_lat = (intify(row['Latitude'], filename)-27)/10
-            try:
-                coords_dict[_key].append([value_lat, value_lon])
-            except KeyError:
-                coords_dict[_key] = [[value_lat, value_lon]]
-    count = 0
-    mean = 0
-    for key in coords_dict:
-        # count += len(coords_dict[key])
-        # mean += np.sum(coords_dict[key], axis=0)
-        coords_dict[key] = torch.tensor(np.array(coords_dict[key]))
-    # print(f"Mean : {mean/count}")
-    return coords_dict
+    csvfile = pd.read_csv(filename)
 
+    for record_idx in range(csvfile.shape[0]):
+        _key = csvfile.loc[record_idx, 'ID']
+        value_lon = (
+            intify(csvfile.loc[record_idx, 'Longitude'], filename) + 65
+        ) / 20
+        value_lat = (
+            intify(csvfile.loc[record_idx, 'Latitude'], filename) - 27
+        ) / 10
+
+        try:
+            coords_dict[_key].append([value_lat, value_lon])
+        except KeyError:
+            coords_dict[_key] = [[value_lat, value_lon]]
+
+    for key in coords_dict:
+        coords_dict[key] = torch.tensor(
+            np.array(coords_dict[key]), dtype=torch.float32
+        )
+    return coords_dict

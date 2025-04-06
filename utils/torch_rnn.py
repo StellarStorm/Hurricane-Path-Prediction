@@ -1,6 +1,5 @@
-import numpy as np
 import torch
-from torch.nn import Module, LSTM, BatchNorm1d, Linear, MaxPool1d, MaxPool2d, Identity
+from torch.nn import LSTM, BatchNorm1d, Identity, Linear, Module
 
 
 class HurricaneRNN(Module):
