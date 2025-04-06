@@ -106,8 +106,8 @@ if __name__ == "__main__":
         x, y, y_hat = batch
         for i in range(len(x)):
             x[i] = torch.add(
-                torch.multiply(x[i], torch.tensor([[10, 20]], device=device)),
-                torch.tensor([[27, -65]], device=device),
+                torch.multiply(x[i], torch.tensor([[10, 20]])),
+                torch.tensor([[27, -65]]),
             )
             for vec in x[i].detach().cpu().numpy():
                 plt.scatter(vec[1] , vec[0] * 1, c="blue")
