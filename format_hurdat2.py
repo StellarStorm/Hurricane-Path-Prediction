@@ -3,7 +3,9 @@ import os
 import pandas as pd
 import requests
 
-ATL_HURDAT2 = 'https://www.nhc.noaa.gov/data/hurdat/hurdat2-1851-2024-040425.txt'
+ATL_HURDAT2 = (
+    'https://www.nhc.noaa.gov/data/hurdat/hurdat2-1851-2024-040425.txt'
+)
 
 columns = [
     'ID',
@@ -28,7 +30,7 @@ columns = [
     'High Wind SE',
     'High Wind SW',
     'High Wind NW',
-    'Maximum Wind Radius'
+    'Maximum Wind Radius',
 ]
 
 records = []
