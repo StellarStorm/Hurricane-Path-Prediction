@@ -1,6 +1,6 @@
 import geopy.distance
+import matplotlib.pyplot as plt
 import torch
-from matplotlib import pyplot as plt
 from numpy.random import shuffle
 from torch.nn import MSELoss
 from torchmetrics import MeanAbsoluteError
@@ -20,33 +20,37 @@ def test_pacific_lon(size, batch_size=16, device: str = 'cpu'):
         )
     )
     model.eval()
-    #model.load_state_dict(torch.load("models/HurricaneRes_RNN_2D_Atlantic_1LSTMS_256_cpu_short_term_5pts.h5"))
+    # model.load_state_dict(torch.load("models/HurricaneRes_RNN_2D_Atlantic_1LSTMS_256_cpu_short_term_5pts.h5"))
 
     dict_atlantique = coords_parser('Data/atlantic_latest.csv')
     dict_atlantique = remove_small_samples(dict_atlantique, min_size=size)
 
-    train_keys, val_keys, test_keys = train_val_test_split(list(dict_atlantique.keys()))
+    train_keys, val_keys, test_keys = train_val_test_split(
+        list(dict_atlantique.keys())
+    )
     x_test = []
     y_test = []
     for key in test_keys:
-        for i in range(len(dict_atlantique[key])-size+1):
-            x_test.append(dict_atlantique[key][i:size-1+i])
-            y_test.append(dict_atlantique[key][size - 1 + i:size + i])
+        for i in range(len(dict_atlantique[key]) - size + 1):
+            x_test.append(dict_atlantique[key][i : size - 1 + i])
+            y_test.append(dict_atlantique[key][size - 1 + i : size + i])
     nb_data_test = len(x_test)
     permut = list(range(nb_data_test))
     shuffle(permut)
     x_test_, y_test_ = [x_test[i] for i in permut], [y_test[i] for i in permut]
     x_test, y_test = x_test_, y_test_
     if not nb_data_test == len(y_test):
-        raise ValueError(f" X and Y must be of same length. Found x : {nb_data_test} and y : {len(y_test)}")
+        raise ValueError(
+            f' X and Y must be of same length. Found x : {nb_data_test} and y : {len(y_test)}'
+        )
 
     x_test = torch.stack(x_test, dim=0).to(device).float()
     y_test = torch.stack(y_test, dim=0).to(device).float()
 
     nb_iters_test = nb_data_test // batch_size
     mean_rmse = 0.0
-    mean_mae= 0.0
-    mean_dist= 0.0
+    mean_mae = 0.0
+    mean_dist = 0.0
     rmse = MSELoss().to(device)
     mae = MeanAbsoluteError().to(device)
 
@@ -81,18 +85,21 @@ def test_pacific_lon(size, batch_size=16, device: str = 'cpu'):
                 # print(mean_dist)
             result.append(
                 (
-                    x_test[i * batch_size : (i + 1) * batch_size],
+                    data,
                     gt,
                     out.detach(),
                 )
             )
-    print(f"Test RMSE {mean_rmse / nb_iters_test}")
-    print(f"Test MSE {(mean_rmse / nb_iters_test)**2}")
-    print(f"Test MAE {mean_mae / nb_iters_test}")
-    print(f"Test Distance (approx.):  {mean_dist / (nb_iters_test * batch_size)} n miles")
+    print(f'Test RMSE {mean_rmse / nb_iters_test}')
+    print(f'Test MSE {(mean_rmse / nb_iters_test) ** 2}')
+    print(f'Test MAE {mean_mae / nb_iters_test}')
+    print(
+        f'Test Distance (approx.):  {mean_dist / (nb_iters_test * batch_size)} n miles'
+    )
     return result
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     if torch.cuda.is_available():
         device = 'cuda'
     elif torch.mps.is_available():
@@ -110,7 +117,7 @@ if __name__ == "__main__":
                 torch.tensor([[27, -65]]),
             )
             for vec in x[i].detach().cpu().numpy():
-                plt.scatter(vec[1] , vec[0] * 1, c="blue")
+                plt.scatter(vec[1], vec[0] * 1, c='blue')
             plt.scatter(
                 y[i].detach().cpu().numpy()[0][1],
                 y[i].detach().cpu().numpy()[0][0],
