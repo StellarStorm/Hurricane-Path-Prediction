@@ -79,7 +79,7 @@ def train_pacific_lon(
         model.train()
         for i in range(nb_iters):
             data = x_train[i * batch_size : (i + 1) * batch_size, ...]
-            gt = y_train[i * batch_size : (i + 1) * batch_size, ...]
+            gt = y_train[i * batch_size : (i + 1) * batch_size, :, :2]
             opt.zero_grad()
             out = model(data)
             loss = torch.sqrt(mse(torch.unsqueeze(out, dim=1), gt))
@@ -91,7 +91,7 @@ def train_pacific_lon(
         with torch.no_grad():
             for i_val in range(nb_iters_val):
                 data = x_val[i_val * batch_size : (i_val + 1) * batch_size, ...]
-                gt = y_val[i_val * batch_size : (i_val + 1) * batch_size, ...]
+                gt = y_val[i_val * batch_size : (i_val + 1) * batch_size, :, :2]
                 out = model(data)
                 loss = torch.sqrt(mse(torch.unsqueeze(out, dim=1), gt))
                 mean_loss_val += loss.item()

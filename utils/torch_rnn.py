@@ -10,13 +10,13 @@ class HurricaneRNN(Module):
         self.hidden_size = 256
         self.bn = BatchNorm1d(series_length)
         self.lstm1 = LSTM(
-            input_size=2,
+            input_size=4,
             dropout=self.dropout,
             hidden_size=self.hidden_size,
             batch_first=True,
         )
         self.dense = Linear(
-            in_features=self.hidden_size * series_length + 2 * series_length,
+            in_features=self.hidden_size * series_length + 4 * series_length,
             out_features=256,
         )
         self.out = Linear(in_features=256, out_features=2)

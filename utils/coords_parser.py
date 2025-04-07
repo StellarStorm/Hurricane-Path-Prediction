@@ -51,10 +51,24 @@ def coords_parser(filename, ocean: str = 'auto'):
             csvfile.loc[record_idx, 'Latitude'], ocean=ocean
         )
 
+        # Patricia max wind speed was 185 kt - using 200 as max
+        if pd.isnull(csvfile.loc[record_idx, 'Maximum Wind']):
+            winds = 52.6 / 200  # 52.6 is mean value
+        else:
+            winds = csvfile.loc[record_idx, 'Maximum Wind'] / 200
+        # Wilma lowest pressure was 882 mb - using 850 as min
+        # 1024 is the upper limit in the atlantic data
+        if pd.isnull(csvfile.loc[record_idx, 'Minimum Pressure']):
+            pressure = (1024 - 992) / (1024 - 850)  # 992 is mean value
+        else:
+            pressure = (1024 - csvfile.loc[record_idx, 'Minimum Pressure']) / (
+                1024 - 850
+            )
+
         try:
-            coords_dict[_key].append([value_lat, value_lon])
+            coords_dict[_key].append([value_lat, value_lon, winds, pressure])
         except KeyError:
-            coords_dict[_key] = [[value_lat, value_lon]]
+            coords_dict[_key] = [[value_lat, value_lon, winds, pressure]]
 
     for key in coords_dict:
         coords_dict[key] = torch.tensor(

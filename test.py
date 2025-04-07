@@ -58,7 +58,7 @@ def test_pacific_lon(size, batch_size=16, device: str = 'cpu'):
     with torch.inference_mode():
         for i in tqdm(range(nb_iters_test)):
             data = x_test[i * batch_size : (i + 1) * batch_size, ...]
-            gt = y_test[i * batch_size : (i + 1) * batch_size, ...]
+            gt = y_test[i * batch_size : (i + 1) * batch_size, :, :2]
             out = model(data)
             out = torch.add(
                 torch.multiply(out, torch.tensor([[10, 20]], device=device)),
@@ -72,8 +72,6 @@ def test_pacific_lon(size, batch_size=16, device: str = 'cpu'):
             mae_value = mae(torch.unsqueeze(out, dim=1), gt)
             mean_rmse += rmse_value.item()
             mean_mae += mae_value.item()
-            lat_dist = torch.mean(59.9 * (out[:, 0] - gt[:, :, 0]))
-            lon_dist = torch.mean(47.79 * (out[:, 0] - gt[:, :, 0]))
             for i_ in range(batch_size):
                 lat1 = out[i_, 0].detach()
                 lon1 = out[i_, 1].detach()
@@ -112,21 +110,24 @@ if __name__ == '__main__':
 
     for batch in points:
         x, y, y_hat = batch
+        x = x[..., :2]
         for i in range(len(x)):
             x[i] = torch.add(
                 torch.multiply(x[i].detach().cpu(), torch.tensor([[10, 20]])),
                 torch.tensor([[27, -65]]),
             )
             for vec in x[i].detach().cpu().numpy():
-                plt.scatter(vec[1], vec[0] * 1, c='blue')
+                plt.scatter(vec[1], vec[0] * 1, c='blue', marker='.')
             plt.scatter(
                 y[i].detach().cpu().numpy()[0][1],
                 y[i].detach().cpu().numpy()[0][0],
                 c='red',
+                marker='.',
             )
             plt.scatter(
                 y_hat[i].detach().cpu().numpy()[1],
                 y_hat[i].detach().cpu().numpy()[0],
                 c='pink',
+                marker='x',
             )
         plt.show()
