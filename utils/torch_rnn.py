@@ -13,6 +13,7 @@ class HurricaneRNN(Module):
             input_size=2,
             dropout=self.dropout,
             hidden_size=self.hidden_size,
+            batch_first=True,
         )
         self.dense = Linear(
             in_features=self.hidden_size * series_length + 2 * series_length,
