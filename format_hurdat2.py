@@ -44,7 +44,9 @@ for line in lines:
         name = components[1]
     else:
         if len(components[0]) > 0:
-            records.append([stormid, name] + components)
+            # Some missing data is -99, other is -999
+            py_comps = [None if x.startswith('-99') else x for x in components]
+            records.append([stormid, name] + py_comps)
 
 hurdat2_csv = pd.DataFrame(records, columns=columns)
 
