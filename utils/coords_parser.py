@@ -3,28 +3,30 @@ import pandas as pd
 import torch
 
 
-def intify_atlante(data):
-    if 'W' in data or 'S' in data:
-        return -float(data[:-1])
-    elif 'E' in data or 'N' in data:
-        return float(data[:-1])
+def normalize_coords(coord, ocean='atlantic'):
+    hemisphere = coord[-1]
+    stripped_cord = float(coord[:-1])
+
+    if hemisphere not in ('N', 'S', 'E', 'W'):
+        raise ValueError(
+            f'Coordinates must end in one of N/S/E/W, not {hemisphere}'
+        )
+
+    if hemisphere == 'N':
+        return (stripped_cord - 27) / 10
+    if hemisphere == 'E':
+        return (stripped_cord + 65) / 20
+    if hemisphere == 'S':
+        if ocean == 'atlantic':
+            return (-stripped_cord - 27) / 10
+        return ((360 - stripped_cord) - 27) / 10
+    if hemisphere == 'W':
+        if ocean == 'atlantic':
+            return (-stripped_cord + 65) / 20
+        return (360 - stripped_cord + 65) / 20
 
 
-def intify_pacifique(data):
-    if 'W' in data or 'S' in data:
-        return 360 - float(data[:-1])
-    elif 'E' in data or 'N' in data:
-        return float(data[:-1])
-
-
-def intify(data, ocean):
-    if 'pacific' in ocean:
-        return intify_pacifique(data)
-    else:
-        return intify_atlante(data)
-
-
-def coords_parser(filename):
+def coords_parser(filename, ocean: str = 'auto'):
     """
     Parses NOAA csv file to extract the coordinates of the hurricane/ storm during its progression.
 
@@ -34,15 +36,20 @@ def coords_parser(filename):
     """
     coords_dict = {}
     csvfile = pd.read_csv(filename)
+    if ocean == 'auto':
+        if 'atlantic' in filename.lower():
+            ocean = 'atlantic'
+        else:
+            ocean = 'pacific'
 
     for record_idx in range(csvfile.shape[0]):
         _key = csvfile.loc[record_idx, 'ID']
-        value_lon = (
-            intify(csvfile.loc[record_idx, 'Longitude'], filename) + 65
-        ) / 20
-        value_lat = (
-            intify(csvfile.loc[record_idx, 'Latitude'], filename) - 27
-        ) / 10
+        value_lon = normalize_coords(
+            csvfile.loc[record_idx, 'Longitude'], ocean=ocean
+        )
+        value_lat = normalize_coords(
+            csvfile.loc[record_idx, 'Latitude'], ocean=ocean
+        )
 
         try:
             coords_dict[_key].append([value_lat, value_lon])
