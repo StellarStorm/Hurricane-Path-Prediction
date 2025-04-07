@@ -113,12 +113,12 @@ if __name__ == '__main__':
     else:
         device = 'cpu'
 
-    previous_data_points = 10
+    size = 5
     history = train_pacific_lon(
-        size=5,
+        size=size,
         nb_epochs=120,
-        batch_size=9216,
-        model_h5_filename=f'models/HurricaneRes_RNN_2D_Atlantic_1LSTMS_256_{device}_short_term_5pts.h5',
+        batch_size=512,
+        model_h5_filename=f'models/HurricaneRes_RNN_2D_Atlantic_1LSTMS_256_{device}_short_term_{size}pts.h5',
         device=device,
     )
 

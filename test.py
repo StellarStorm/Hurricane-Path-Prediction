@@ -16,7 +16,7 @@ def test_pacific_lon(size, batch_size=16, device: str = 'cpu'):
 
     model.load_state_dict(
         torch.load(
-            f'models/HurricaneRes_RNN_2D_Atlantic_1LSTMS_256_{device}_short_term_5pts.h5'
+            f'models/HurricaneRes_RNN_2D_Atlantic_1LSTMS_256_{device}_short_term_{size}pts.h5'
         )
     )
     model.eval()
@@ -107,13 +107,14 @@ if __name__ == '__main__':
     else:
         device = 'cpu'
 
-    points = test_pacific_lon(size=5, batch_size=16)
+    size = 5
+    points = test_pacific_lon(size=size, batch_size=16, device=device)
 
     for batch in points:
         x, y, y_hat = batch
         for i in range(len(x)):
             x[i] = torch.add(
-                torch.multiply(x[i], torch.tensor([[10, 20]])),
+                torch.multiply(x[i].detach().cpu(), torch.tensor([[10, 20]])),
                 torch.tensor([[27, -65]]),
             )
             for vec in x[i].detach().cpu().numpy():
